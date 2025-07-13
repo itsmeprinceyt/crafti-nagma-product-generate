@@ -29,23 +29,21 @@ const initialProduct: Product = {
 /**
  * @brief To turn object variables from "id" => id
  */
-function objectToLiteral(obj: any, indent = 2): string {
+function objectToLiteral(obj: unknown, indent = 2): string {
   const spacing = " ".repeat(indent);
-  const format = (val: any, depth: number): string => {
+
+  const format = (val: unknown, depth: number): string => {
     const pad = " ".repeat(depth * indent);
+
     if (Array.isArray(val)) {
       if (val.length === 0) return "[]";
-      const inner = val
-        .map((item) => format(item, depth + 1))
-        .join(",\n" + pad + spacing);
+      const inner = val.map((item) => format(item, depth + 1)).join(",\n" + pad + spacing);
       return `[\n${pad + spacing}${inner}\n${pad}]`;
     }
 
-    if (typeof val === "object" && val !== null) {
-      const entries = Object.entries(val)
-        .map(
-          ([key, value]) => `${pad + spacing}${key}: ${format(value, depth + 1)}`
-        )
+    if (typeof val === "object" && val !== null && !Array.isArray(val)) {
+      const entries = Object.entries(val as Record<string, unknown>)
+        .map(([key, value]) => `${pad + spacing}${key}: ${format(value, depth + 1)}`)
         .join(",\n");
       return `{\n${entries}\n${pad}}`;
     }
@@ -53,8 +51,10 @@ function objectToLiteral(obj: any, indent = 2): string {
     if (typeof val === "string") return `"${val}"`;
     return String(val);
   };
+
   return format(obj, 0);
 }
+
 
 const Tooltip = ({ text, onClose }: { text: string; onClose: () => void }) => (
   <div className="fixed inset-0 min-h-screen p-10 bg-amber-600/90 flex items-center justify-center z-50">
@@ -112,9 +112,10 @@ export default function ProductForm() {
   }, [tooltip]);
 
 
-  const updateField = (field: keyof Product, value: any) => {
+  const updateField = <K extends keyof Product>(field: K, value: Product[K]) => {
     setProduct({ ...product, [field]: value });
   };
+
 
   const handleGenerate = () => {
     const finalProduct = {
@@ -134,18 +135,31 @@ export default function ProductForm() {
     setJsonResult(jsLiteral);
   };
 
-  const handleAddInput = (stateSetter: any, defaultValue: any) => {
-    stateSetter((prev: any[]) => [...prev, defaultValue]);
-  };
+  function handleAddInput<T>(
+    stateSetter: React.Dispatch<React.SetStateAction<T[]>>,
+    defaultValue: T
+  ) {
+    stateSetter((prev) => [...prev, defaultValue]);
+  }
 
-  const handleInputChange = (stateSetter: any, index: number, value: any, key?: string) => {
-    stateSetter((prev: any[]) => {
+
+  function handleInputChange<T>(
+    stateSetter: React.Dispatch<React.SetStateAction<T[]>>,
+    index: number,
+    value: any,
+    key?: keyof T
+  ) {
+    stateSetter((prev) => {
       const updated = [...prev];
-      if (key) updated[index][key] = value;
-      else updated[index] = value;
+      if (key) {
+        updated[index] = { ...updated[index], [key]: value };
+      } else {
+        updated[index] = value;
+      }
       return updated;
     });
-  };
+  }
+
 
   const label_CSS: string = "font-bold";
   const baseButton_CSS: string = "w-full max-w-[120px] text-white border px-4 py-2 rounded-md shadow-xl active:scale-110 hover:scale-105 transition-all ease-in-out duration-300";
@@ -267,7 +281,7 @@ export default function ProductForm() {
         <div className="flex items-center justify-between">
           <label className={`${label_CSS}`}>Categories</label>
           <button
-            onClick={() => handleAddInput(setCategoryInputs, "")}
+            onClick={() => handleAddInput<string>(setCategoryInputs, "")}
             className="text-blue-500 text-sm"
           >
             + Add Category
@@ -420,7 +434,7 @@ export default function ProductForm() {
         <div className="flex items-center justify-between">
           <label className={`${label_CSS}`}>Care Instructions</label>
           <button
-            onClick={() => handleAddInput(setCareInputs, "")}
+            onClick={() => handleAddInput<string>(setCareInputs, "")}
             className="text-blue-500 text-sm"
           >
             + Add Instruction
@@ -529,7 +543,7 @@ export default function ProductForm() {
         <div className="flex items-center justify-between">
           <label className={`${label_CSS}`}>Features</label>
           <button
-            onClick={() => handleAddInput(setFeatureInputs, "")}
+            onClick={() => handleAddInput<string>(setFeatureInputs, "")}
             className="text-blue-500 text-sm"
           >
             + Add Feature
