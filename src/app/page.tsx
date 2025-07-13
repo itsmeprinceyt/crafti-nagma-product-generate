@@ -146,20 +146,24 @@ export default function ProductForm() {
   function handleInputChange<T>(
     stateSetter: React.Dispatch<React.SetStateAction<T[]>>,
     index: number,
-    value: any,
+    value: T | T[keyof T],
     key?: keyof T
   ) {
     stateSetter((prev) => {
       const updated = [...prev];
+
       if (key) {
-        updated[index] = { ...updated[index], [key]: value };
+        updated[index] = {
+          ...updated[index],
+          [key]: value as T[keyof T],
+        };
       } else {
-        updated[index] = value;
+        updated[index] = value as T;
       }
+
       return updated;
     });
   }
-
 
   const label_CSS: string = "font-bold";
   const baseButton_CSS: string = "w-full max-w-[120px] text-white border px-4 py-2 rounded-md shadow-xl active:scale-110 hover:scale-105 transition-all ease-in-out duration-300";
