@@ -9,7 +9,6 @@ const initialProduct: Product = {
   brief_description: "",
   description: "",
   price: 0,
-  main_image: "",
   category: [],
   delivery_charges: 0,
   stock: true,
@@ -121,7 +120,6 @@ export default function ProductForm() {
     const finalProduct = {
       ...product,
       id: "",
-      main_image: "",
       category: categoryInputs,
       care_instructions: careInputs,
       features: featureInputs,

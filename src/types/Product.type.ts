@@ -15,7 +15,6 @@ export interface Product {
     brief_description: string;
     description: string;
     price: number;
-    main_image: string;
     category: string[];
     delivery_charges: number;
     discount_price?: number;
