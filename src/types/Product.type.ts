@@ -30,5 +30,7 @@ export interface Product {
     features: string[];
     is_featured: boolean;
     is_active: boolean;
+    main_showcase?: boolean,
+    gift_included?: string[],
     orders_count: number;
 }

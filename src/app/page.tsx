@@ -22,6 +22,8 @@ const initialProduct: Product = {
   features: [],
   is_featured: true,
   is_active: true,
+  main_showcase: false,
+  gift_included: [],
   orders_count: 0,
 };
 
@@ -74,6 +76,7 @@ export default function ProductForm() {
   const [featureInputs, setFeatureInputs] = useState<string[]>([]);
   const [variantsInputs, setVariantsInputs] = useState<Variant[]>([]);
   const [optionsInputs, setOptionsInputs] = useState<Option[]>([]);
+  const [giftInputs, setGiftInputs] = useState<string[]>([]);
 
   useEffect(() => {
     const saved = localStorage.getItem("product-form-data");
@@ -85,6 +88,7 @@ export default function ProductForm() {
       setFeatureInputs(parsed.features || []);
       setVariantsInputs(parsed.variants || []);
       setOptionsInputs(parsed.options || []);
+      setGiftInputs(parsed.gift_included || []);
     }
   }, []);
 
@@ -96,9 +100,10 @@ export default function ProductForm() {
       features: featureInputs,
       variants: variantsInputs,
       options: optionsInputs,
+      gift_included: giftInputs
     };
     localStorage.setItem("product-form-data", JSON.stringify(data));
-  }, [product, categoryInputs, careInputs, featureInputs, variantsInputs, optionsInputs]);
+  }, [product, categoryInputs, careInputs, featureInputs, variantsInputs, optionsInputs, giftInputs]);
 
 
   useEffect(() => {
@@ -127,6 +132,7 @@ export default function ProductForm() {
       options: optionsInputs,
       discount_price: product.discount_price || 0,
       custom_note: product.custom_note || "",
+      gift_included: giftInputs,
     };
 
     const jsLiteral = objectToLiteral(finalProduct);
@@ -573,6 +579,38 @@ export default function ProductForm() {
         ))}
       </div>
 
+      {/* Gifts Included */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className={`${label_CSS}`}>Gifts</label>
+          <button
+            onClick={() => handleAddInput<string>(setGiftInputs, "")}
+            className="text-blue-500 text-sm"
+          >
+            + Add Gifts
+          </button>
+        </div>
+
+        {giftInputs.map((item, i) => (
+          <div key={i} className="flex items-center gap-2 mb-2">
+            <input
+              value={item}
+              onChange={(e) => handleInputChange(setGiftInputs, i, e.target.value)}
+              className="w-full border px-3 py-2 rounded"
+              placeholder={`Feature ${i + 1}`}
+            />
+            <button
+              onClick={() =>
+                setGiftInputs((prev) => prev.filter((_, index) => index !== i))
+              }
+              className="text-red-500 hover:text-red-700 text-xl font-bold px-2"
+              title="Delete Feature"
+            >
+              ✖
+            </button>
+          </div>
+        ))}
+      </div>
 
       {/* Is Featured */}
       <div className="space-y-2">
@@ -605,6 +643,33 @@ export default function ProductForm() {
           <option value="false">Inactive</option>
         </select>
       </div>
+
+      {/* Main Showcase */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className={label_CSS}>Main Showcase</label>
+          <button
+            onClick={() =>
+              setTooltip(
+                "Use this to mark the product as the main cover for a category. Ensure you upload the image you want to display as 'main' photo."
+              )
+            }
+            className="text-blue-500 text-sm"
+          >
+            Help
+          </button>
+        </div>
+        <p className="text-red-500 text-xs">If you choose this product to be main photo of the category then specify which image is to be used in Google Drive. ( Example: main.png )</p>
+        <select
+          value={product.main_showcase ? "true" : "false"}
+          onChange={(e) => updateField("main_showcase", e.target.value === "true")}
+          className="w-full border px-3 py-2 rounded"
+        >
+          <option value="false">Not Main Cover</option>
+          <option value="true">Use as Main Cover</option>
+        </select>
+      </div>
+
 
       <div className="text-center">
         <button
