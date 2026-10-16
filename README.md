@@ -1,3 +1,1 @@
-A utility webiste for product creation.
-
-Live Link: https://crafti-nagma.vercel.app/
+A utility webiste for product creation for old static website of www.craftinagma.com
